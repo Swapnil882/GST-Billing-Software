@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -102,6 +103,31 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Real-time Terminal Request Logger Middleware
+@app.middleware("http")
+async def request_logger_middleware(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    duration_ms = (time.perf_counter() - start_time) * 1000
+    
+    path = request.url.path
+    # Skip static assets (js/css/images) to keep console logs clear and focused on API & page visits
+    if not any(path.startswith(prefix) for prefix in ("/assets/", "/icons/", "/tesseract/")):
+        status = response.status_code
+        ts = time.strftime("%Y-%m-%d %H:%M:%S")
+        if status < 300:
+            status_tag = f"\033[92m{status} OK\033[0m" if status == 200 else f"\033[92m{status}\033[0m"
+        elif status < 400:
+            status_tag = f"\033[96m{status}\033[0m"
+        elif status < 500:
+            status_tag = f"\033[93m{status}\033[0m"
+        else:
+            status_tag = f"\033[91m{status} ERROR\033[0m"
+            
+        print(f"[{ts}] {request.method:<6} {path:<32} -> {status_tag} ({duration_ms:.1f}ms)", flush=True)
+        
+    return response
 
 # Register all API routers
 app.include_router(bills.router)
