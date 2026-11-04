@@ -8,6 +8,14 @@ import { VitePWA } from 'vite-plugin-pwa'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const readActivePort = () => {
+  if (process.env.BACKEND_PORT) {
+    const p = parseInt(process.env.BACKEND_PORT, 10);
+    if (isFinite(p) && p >= 1024) return p;
+  }
+  if (process.env.VITE_BACKEND_PORT) {
+    const p = parseInt(process.env.VITE_BACKEND_PORT, 10);
+    if (isFinite(p) && p >= 1024) return p;
+  }
   try {
     const p = path.resolve(__dirname, '..', 'data', 'port.txt');
     if (!fs.existsSync(p)) return 47371;

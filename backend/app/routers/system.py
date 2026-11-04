@@ -3,7 +3,7 @@ import sys
 import time
 import httpx
 from fastapi import APIRouter, HTTPException, Response
-from backend.app.config import PACKAGE_JSON_PATH, CHANGELOG_PATH, ERRORS_LOG, LOCAL_PREFS_PATH
+from backend.app.config import PACKAGE_JSON_PATH, CHANGELOG_PATH, ERRORS_LOG, LOCAL_PREFS_PATH, DATA_DIR
 from backend.app.core.storage import read_json
 from backend.app.core.logging_util import redact, log_error, rotate_errors_if_large
 
@@ -53,6 +53,30 @@ def health_check():
         "pid": os.getpid(),
         "hasRecentErrors": bool(errors_tail.strip()),
         "errorsTail": errors_tail,
+    }
+
+@router.get("/api/status")
+def get_system_status():
+    """Alias for /api/health used by frontend diagnostics."""
+    return health_check()
+
+@router.get("/api/supporters")
+def get_supporters():
+    """Returns local or cloud supporters registry."""
+    supporters_file = DATA_DIR / "supporters.json"
+    if supporters_file.exists():
+        try:
+            return read_json(supporters_file, {})
+        except Exception:
+            pass
+    return {
+        "currency": "INR",
+        "totalReceived": 0,
+        "supporters": 0,
+        "goal": {"amount": 50000, "label": "Open-Source GST Billing Software"},
+        "thanks": [],
+        "updated": time.strftime("%Y-%m-%d"),
+        "people": [],
     }
 
 @router.get("/api/db/status")

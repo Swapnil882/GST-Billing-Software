@@ -77,3 +77,40 @@ def launch_script(payload: dict):
     if action == "stop":
         sys.exit(0)
     return {"ok": False, "error": f"Script action {action} not applicable in source development mode"}
+
+@router.post("/backup")
+def control_panel_backup():
+    from backend.app.services.backup_service import run_daily_backup
+    run_daily_backup()
+    return {"ok": True}
+
+@router.post("/restart")
+def control_panel_restart():
+    import time
+    import threading
+    def _do_restart():
+        time.sleep(0.5)
+        run_script = BASE_DIR / "run.py"
+        subprocess.Popen([sys.executable, str(run_script), "--no-open"])
+        os._exit(0)
+    threading.Thread(target=_do_restart, daemon=True).start()
+    return {"ok": True}
+
+@router.post("/uninstall")
+def control_panel_uninstall(payload: dict):
+    confirm = payload.get("confirm")
+    if confirm != "REMOVE":
+        raise HTTPException(status_code=400, detail={"ok": False, "error": "Not confirmed"})
+    return {"ok": False, "error": "Remove works only in an installed distribution package, not in source development mode."}
+
+@router.post("/{action}")
+def control_panel_dynamic_action(action: str):
+    if action == "backup":
+        return control_panel_backup()
+    if action == "open-data-folder":
+        return open_data_folder()
+    if action == "open-backups-folder":
+        return open_backups_folder()
+    if action == "restart":
+        return control_panel_restart()
+    return {"ok": False, "error": f"Action {action} is not configured in source development mode"}

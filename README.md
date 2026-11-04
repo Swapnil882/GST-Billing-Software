@@ -53,16 +53,42 @@ GST-Billing-Software/
 
 ---
 
-## Quick Start
+## Running the Application
 
-### Option 1: Double Click (Windows)
-Double-click `run.bat` in the project root.
+You can run the application either in **Independent Development Mode** (Frontend & Backend running separately in their own terminal windows) or in **Unified Production Mode** (single command).
 
-### Option 2: Command Line
-```powershell
-python run.py
-```
-*This verifies the frontend build, starts the FastAPI server, and opens your browser at [http://127.0.0.1:47371](http://127.0.0.1:47371).*
+### Mode A: Running Frontend & Backend Separately (Recommended for Development)
+
+Run Frontend and Backend in separate terminal windows for instant hot-reloading:
+
+#### 1. Start FastAPI Backend:
+- **Windows**: Double-click `run-backend.bat`
+- **Or Terminal**:
+  ```powershell
+  python backend/run.py
+  ```
+  *Backend listens on [http://127.0.0.1:47371](http://127.0.0.1:47371) (Interactive Swagger Docs at [http://127.0.0.1:47371/docs](http://127.0.0.1:47371/docs)) and streams live request logs.*
+
+#### 2. Start React Frontend (Vite Dev Server):
+- **Windows**: Double-click `run-frontend.bat`
+- **Or Terminal**:
+  ```powershell
+  cd frontend
+  npm run dev
+  ```
+  *Frontend runs on [http://localhost:5173](http://localhost:5173) with instant Hot Module Replacement (HMR) and automatically proxies all `/api` requests to the FastAPI backend.*
+
+---
+
+### Mode B: Running Unified Full-Stack (Single Command)
+
+To run the complete production stack in a single terminal:
+- **Windows**: Double-click `run.bat`
+- **Or Terminal**:
+  ```powershell
+  python run.py
+  ```
+  *This automatically verifies the frontend build, starts the FastAPI server, and serves both the React application and API on [http://127.0.0.1:47371](http://127.0.0.1:47371).*
 
 ---
 

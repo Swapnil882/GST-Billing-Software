@@ -126,6 +126,28 @@ def test_export():
     assert "products" in data
     assert "meta" in data
 
+def test_status_and_supporters():
+    # /api/status alias
+    res = client.get("/api/status")
+    assert res.status_code == 200
+    assert res.json()["ok"] is True
+
+    # /api/supporters
+    res = client.get("/api/supporters")
+    assert res.status_code == 200
+    data = res.json()
+    assert "supporters" in data
+    assert "goal" in data
+
+def test_control_panel():
+    res = client.get("/api/control-panel/status")
+    assert res.status_code == 200
+    assert "dataFolder" in res.json()
+
+    res = client.post("/api/control-panel/backup")
+    assert res.status_code == 200
+    assert res.json()["ok"] is True
+
 def test_spa_serving():
     res = client.get("/")
     assert res.status_code == 200
@@ -137,6 +159,8 @@ if __name__ == "__main__":
     test_health()
     test_version()
     test_profile()
+    test_status_and_supporters()
+    test_control_panel()
     test_meta_counter()
     test_clients_crud()
     test_products_crud()
